@@ -9,7 +9,7 @@ import kotlinx.android.synthetic.main.item_news.view.*
 import waslim.binar.andlima.mvvm.R
 import waslim.binar.andlima.mvvm.model.GetAllNewsItem
 
-class AdapterNews() : RecyclerView.Adapter<AdapterNews.ViewHolder> () {
+class AdapterNews(private val onClick : (GetAllNewsItem) -> Unit) : RecyclerView.Adapter<AdapterNews.ViewHolder> () {
 
     private var dataNews : List<GetAllNewsItem>? = null
 
@@ -32,13 +32,20 @@ class AdapterNews() : RecyclerView.Adapter<AdapterNews.ViewHolder> () {
         holder.itemView.author.text = dataNews!![position].author
         Glide.with(holder.itemView.context).load(dataNews!![position].image).into(holder.itemView.imageView)
 
+        holder.itemView.cardNews.setOnClickListener {
+            onClick(dataNews!![position])
+        }
+
     }
 
     override fun getItemCount(): Int {
-        return if (dataNews == null){
-            0
-        } else {
-            dataNews!!.size
+        return when (dataNews) {
+            null -> {
+                0
+            }
+            else -> {
+                dataNews!!.size
+            }
         }
     }
 

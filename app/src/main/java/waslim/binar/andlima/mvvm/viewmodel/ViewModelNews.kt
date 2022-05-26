@@ -1,43 +1,63 @@
 package waslim.binar.andlima.mvvm.viewmodel
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import waslim.binar.andlima.mvvm.model.GetAllNewsItem
-import waslim.binar.andlima.mvvm.network.ApiClient
+import waslim.binar.andlima.mvvm.network.ApiService
+import javax.inject.Inject
 
-class ViewModelNews : ViewModel(){
+@HiltViewModel
+class ViewModelNews @Inject constructor(apiService : ApiService) : ViewModel(){
 
-    lateinit var liveDataNews : MutableLiveData<List<GetAllNewsItem>?>
+    private var newsLiveData = MutableLiveData<List<GetAllNewsItem>>()
+
+    val news : LiveData<List<GetAllNewsItem>?> = newsLiveData
 
     init {
-        liveDataNews = MutableLiveData()
+        viewModelScope.launch {
+            val datanews = apiService.getAllNews()
+            delay(1000)
+            newsLiveData.value = datanews
+        }
     }
 
-    fun liveGetDataNews() : MutableLiveData<List<GetAllNewsItem>?>{
-        return liveDataNews
-    }
 
-    fun getDataNews(){
-        ApiClient.instance.getAllNews()
-            .enqueue(object : Callback<List<GetAllNewsItem>>{
-                override fun onResponse(
-                    call: Call<List<GetAllNewsItem>>,
-                    response: Response<List<GetAllNewsItem>>
-                ) {
-                    if (response.isSuccessful){
-                        liveDataNews.postValue(response.body())
-                    } else {
-                        liveDataNews.postValue(null)
-                    }
-                }
 
-                override fun onFailure(call: Call<List<GetAllNewsItem>>, t: Throwable) {
-                    liveDataNews.postValue(null)
-                }
+//======================================= TANPA DI ================================================//
+//    lateinit var liveDataNews : MutableLiveData<List<GetAllNewsItem>?>
+//
+//    init {
+//        liveDataNews = MutableLiveData()
+//    }
+//
+//    fun liveGetDataNews() : MutableLiveData<List<GetAllNewsItem>?>{
+//        return liveDataNews
+//    }
+//
+//    fun getDataNews(){
+//        ApiClient.instance.getAllNews()
+//            .enqueue(object : Callback<List<GetAllNewsItem>>{
+//                override fun onResponse(
+//                    call: Call<List<GetAllNewsItem>>,
+//                    response: Response<List<GetAllNewsItem>>
+//                ) {
+//                    if (response.isSuccessful){
+//                        liveDataNews.postValue(response.body())
+//                    } else {
+//                        liveDataNews.postValue(null)
+//                    }
+//                }
+//
+//                override fun onFailure(call: Call<List<GetAllNewsItem>>, t: Throwable) {
+//                    liveDataNews.postValue(null)
+//                }
+//
+//            })
+//    }
 
-            })
-    }
 }
